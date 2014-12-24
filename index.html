@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Table Add Rows</title>
+
+	<style type="text/css">
+		body {
+			margin: 0;
+			z-index: 0;
+			height: 100%; 
+		}
+
+		#draggable {
+			padding: 5px;
+			background: #aaa;
+			color: #000;
+			cursor: crosshair;
+			position: absolute;
+			top: 50px;
+			left: 90px;
+			z-index: 9999;
+		}
+
+		#mytable td{
+			border: 1px solid #000;
+			padding: 5px;
+		}
+
+	</style>
+</head>
+<body>
+	<table id="mytable">
+		<tr>
+			<td>
+				One
+			</td>
+			<td>
+				Two
+			</td>
+			<td>
+				Three
+			</td>
+			<td>
+				<button type="button" class="removerow"> &times </button>
+			</td>
+		</tr>
+	</table>
+
+	<span id="draggable">Drag Me to add Rows</span>
+
+	<script src="jquery.js"></script>
+	<script src="jquery-ui.js"></script>
+
+
+
+	<script type="text/javascript">
+
+		var table = document.getElementById("mytable");	
+		var rowheight = table.rows[0].offsetHeight;
+		var tableheight = $(table).css("height");
+		$("#draggable").css("top", tableheight);
+
+		console.log(rowheight);
+		var k = 0;
+
+	function addRow() {
+
+		var rows = table.rows.length;
+		var cols = table.rows[0].cells.length;
+		var newrow = table.insertRow(rows);
+
+		for (var i = 0; i < cols; i++, k++) {
+			var newcell = newrow.insertCell(i);
+			newcell.innerHTML= k;
+			if(i == cols - 1)
+			{
+				newcell.innerHTML = '<button type="button" class="removerow"> &times </button>';
+			}
+		};
+
+		console.log("Rows: " + rows + " Columns: " + cols);
+	}
+
+	/*function delRow() {
+		console.clear();
+		var rowindex =  $(this).closest("table").children().index($(this).closest("tr"));
+		console.log(rowindex);
+		table.deleteRow(rowindex);
+		updateDraggablePosition();
+	}*/
+
+	$(document).on('click', 'button.removerow', function () {
+     $(this).closest('tr').remove();
+     updateDraggablePosition();
+     return false;
+ 	});
+
+
+	//draggable implementation
+
+	var oldY, newY;
+
+	$(function() {
+		
+	    $( "#draggable" ).draggable({
+
+	    	axis: "y",
+	    	scroll: true,
+	    	scrollbarSensetivity: 1,
+	    	scrollSpeed: 100,
+	    	start: function() {
+	    		updateDraggablePosition();
+	    	},
+
+	    	drag: function() {
+
+	    		newY = $("#draggable").offset().top;
+
+		    		if((newY > oldY) && ((newY - oldY)%rowheight == 0))
+		    		{
+		    			console.log(newY + " " + oldY);
+		    			addRow();
+		    			updateDraggablePosition();
+		    		}
+		    		else if(newY < oldY){
+		    			$('#draggable').css({top: oldY + 'px'});
+		    		}
+	    	},
+
+	    	stop: function() {
+	    		updateDraggablePosition();
+	    	}
+	    	
+	    });
+	  });
+
+	function updateDraggablePosition() {
+		tableheight = $(table).css("height");
+		$("#draggable").css("top", tableheight);
+		oldY = $("#draggable").offset().top;
+	}
+
+	</script>
+</body>
+</html>
