@@ -6,9 +6,11 @@
 
 	<style type="text/css">
 		* {
-			box-sizing: border-box;
+			
 			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
+			   -moz-box-sizing: border-box;
+			        box-sizing: border-box;
+
 		}
 
 		body {
@@ -17,30 +19,34 @@
 			height: 100%; 
 		}
 
-		#draggable {
+		#draggabley,
+		#draggablex {
+			will-change: opacity;
 			background: #eee;
 			color: #000;
 			cursor: crosshair;
-			left: 90px;
+			opacity: 0.5;
 			padding: 5px;
 			position: absolute;
-			top: 50px;
+			text-align: center;
 			z-index: 9999;
+			-webkit-transition: opacity 0.5s ease-in;
+			   -moz-transition: opacity 0.5s ease-in;
+			        transition: opacity 0.5s ease-in;			
 		}
+
+		#draggabley:hover,
+		#draggablex:hover {
+			opacity: 1;
+		} 		
 
 		#mytable {
 			border-collapse: collapse;
 			border-spacing: none;
+			position: absolute;
+			top: 20%;
+			left: 20%;
 		}
-
-/* 		tr:last-child {
-	border: none;
-	display: none;
-}
-
-#mytable tr:hover #mytable tr:last-child {
-	display: block;
-} */
 
 		#mytable td{
 			border: 1px solid #000;
@@ -48,19 +54,9 @@
 			height: 30px;
 		}
 
-		.tableborder {
-			cursor: crosshair;
-			display: inline;
-		}
-
-		#mytable :after{
-			clear: both;
-			zoom: 1;
-		}
-
 		#log {
 			position: absolute;
-			top: 50%;
+			top: 10%;
 			right: 10%;
 		}
 
@@ -68,7 +64,6 @@
 </head>
 <body>
 	
-	<div class="tableborder">
 	<table id="mytable">
 		<tr>
 			<td class="col-1">
@@ -85,171 +80,15 @@
 			</td>
 		</tr>
 	</table>
-	</div>
-
-	<button onclick="addColumn()"> Add Column</button>
 
 	<div id="log"></div>
 
-	<span id="draggable">+</span>
+	<span id="draggabley">+</span>
+	<span id="draggablex">+</span>
 
 	<script src="jquery.js"></script>
 	<script src="jquery-ui.js"></script>
-
-
-
-	<script type="text/javascript">
-		var log = document.getElementById("log");
-		var table = document.getElementById("mytable");	
-		var rowheight = table.rows[0].offsetHeight;
-		var columnwidth = table.rows[0].cells[1].offsetWidth;
-
-		alert(columnwidth);
-
-		var tableheight = $(table).css("height");
-		var tablewidth = $(table).css("width");
-		$("#draggable").css({	
-								'top': tableheight + $(table).style.top,
-								'left': tablewidth + $(table).style.left
-							});
-
-		log.innerHTML=rowheight;
-		var k = 0, rows, cols, newrow, newcolumn, newcell;
-
-
-
-
-		/*
-		* function for adding a row
-		*/
-
-		function addRow() {
-
-			rows = table.rows.length;
-			cols = table.rows[0].cells.length;
-			newrow = table.insertRow(rows);
-
-			for (var i = 0; i < cols; i++, k++) {
-				newcell = newrow.insertCell(i);
-				newcell.innerHTML= k;
-				if(i == cols - 1)
-				{
-					newcell.innerHTML = '<button type="button" class="removerow"> &times </button>';
-				}
-			};
-		}
-
-
-		/*
-		* function for adding a column
-		*/
-
-		function addColumn() {
-			rows = table.rows.length;
-			cols = table.rows[0].cells.length;
-
-			for (var i = 0; i < rows; i++) {
-				newcell = table.rows[i].insertCell(cols);
-				newcell.innerHTML="newcell"	
-			};
-		}
-
-
-
-		/*
-		* function for deleting a row
-		*/
-
-		$(document).on('click', 'button.removerow', function () {
-		     $(this).closest('tr').remove();
-		     updateDraggablePosition();
-		     return false;
-	 	});
-
-
-
-		/*
-		* function for deleting a column
-		*/
-
-		$(document).on('click', 'button.removecolumn', function () {
-			
-			rows = table.rows.length;
-			var index = $(this).closest('tr').children().index($(this).closest('td'));
-
-			for (var i = 0; i < rows; i++) {
-				table.rows[i].deleteCell(index);
-			};
-
-		});
-
-	
-
-	/*
-	* Add Rows and Columns on drag
-	*/
-
-	var oldY, newY, oldX, newX;
-
-
-	$(function() {
-		
-	    $( "#draggable" ).draggable({
-
-	    	axis: "y",
-	    	scroll: true,
-	    	scrollbarSensetivity: 1,
-	    	scrollSpeed: 100,
-	    	start: function() {
-	    		updateDraggablePosition();
-	    		log.innerHTML="oldY: " + oldY + "newY: " + newY;
-	    	},
-
-	    	drag: function() {
-
-	    		newY = $("#draggable").offset().top;
-	    			log.innerHTML="oldY: " + oldY + "newY: " + newY;
-
-	    			var noofrows = (newY - oldY)%rowheight;
-
-		    		if(newY > oldY)
-		    		{
-		    			for (var i = 0; i < noofrows; i++) {
-		    				addRow();
-		    				updateDraggablePosition();
-		    			};
-		    			
-		    		}
-		    		else if(newY < oldY){
-		    			$('#draggable').css({top: oldY + 'px'});
-		    		}
-	    	},
-
-	    	stop: function() {
-	    		updateDraggablePosition();
-	    		log.innerHTML="oldY: " + oldY + "newY: " + newY;
-	    	}
-	    	
-	    });
-	  });
-
-
-	function updateDraggablePosition() {
-		tableheight = $(table).css("height");
-		tablewidth = $(table).css("width");
-		$("#draggable").css({	
-								'top': tableheight,
-								'left': tablewidth
-							});
-
-		oldY = $("#draggable").offset().top;
-		oldX = $("#draggable").offset().left;
-	}
-
-
-
-
-
-	</script>
+	<script src="jquery.ui.touch-punch.min.js"></script>
+	<script src="scripts.js"></script>
 </body>
 </html>
